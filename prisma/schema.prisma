@@ -1,0 +1,234 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  password      String?   // Hashed password for email auth
+  image         String?   // Avatar for OAuth
+  role          UserRole  @default(USER)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+  channels      Channel[]
+  apiKeys       ApiKey[]
+  projects      Project[]
+  dataPoints    DataPoint[]
+  userProjects  UserProject[] // Projects the user has activated/bookmarked
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+model Channel {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  isPublic    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String
+
+  // Field labels (like ThingSpeak field1-field8)
+  field1Label String?
+  field2Label String?
+  field3Label String?
+  field4Label String?
+  field5Label String?
+  field6Label String?
+  field7Label String?
+  field8Label String?
+
+  // API Keys for the channel
+  readApiKey  String    @unique
+  writeApiKey String    @unique
+
+  // Relations
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  dataPoints DataPoint[]
+
+  @@map("channels")
+}
+
+model ApiKey {
+  id          String     @id @default(cuid())
+  key         String     @unique
+  name        String?
+  expiresAt   DateTime
+  status      ApiKeyStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  userId      String
+  lastUsedAt  DateTime?
+  requestCount Int      @default(0)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
+}
+
+model DataPoint {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  
+  // Field values (up to 8 fields like ThingSpeak)
+  field1  Float?
+  field2  Float?
+  field3  Float?
+  field4  Float?
+  field5  Float?
+  field6  Float?
+  field7  Float?
+  field8  Float?
+  
+  // Metadata
+  latitude  Float?
+  longitude Float?
+  elevation Float?
+  status    String?  // Device status message
+
+  // Relations
+  channelId String
+  channel   Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+  @@index([userId, createdAt])
+  @@map("data_points")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  type        ProjectType @default(BASIC) // BASIC or IOT
+  
+  // Media
+  imageUrl    String?  // Thumbnail URL
+  videoUrl    String?  // YouTube or Drive video URL
+  diagramUrl  String?  // Circuit/block diagram image
+  driveLink   String?  // Google Drive link for resources
+  
+  // Content - stored as JSON for flexibility
+  components  String[] // List of components required
+  connections String[] // Pinout/circuit connections
+  steps       String[] // Step-by-step instructions
+  working     String?  // Working principle explanation
+  references  String[] // External reference links
+  code        String?  // Arduino/ESP32 code (for IOT projects)
+  fieldLabels String[] // Channel field labels for IOT projects ["Temperature", "Humidity", etc.]
+  
+  // Metadata
+  tags        String[] // Array of tags ["Arduino", "ESP32", "Sensors"]
+  category    String?  // Category like "Home Automation", "Weather Station"
+  difficulty  Difficulty @default(BEGINNER) // Beginner, Intermediate, Advanced
+  duration    String?    // Estimated time to complete
+  isPublished Boolean  @default(true)
+  featured    Boolean  @default(false) // Featured on homepage
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Who uploaded the project
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // User projects - track which users are using this project
+  userProjects UserProject[]
+
+  @@map("projects")
+}
+
+// Track which users have activated/used a project
+model UserProject {
+  id          String   @id @default(cuid())
+  userId      String
+  projectId   String
+  channelId   String?  // Auto-created channel for IOT projects
+  createdAt   DateTime @default(now())
+  completed   Boolean  @default(false)
+  bookmarks   Boolean  @default(false)
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, projectId])
+  @@map("user_projects")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  EXPIRED
+  REVOKED
+}
+
+enum ProjectType {
+  BASIC
+  IOT
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
