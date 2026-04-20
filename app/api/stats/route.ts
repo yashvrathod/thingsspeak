@@ -4,6 +4,8 @@ import { authOptions } from '@/lib/auth'
 import { getUserStats } from '@/lib/data'
 import { prisma } from '@/lib/db'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/stats - Get user statistics
 export async function GET() {
   try {
