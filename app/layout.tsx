@@ -10,12 +10,12 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: 'Pulse - Seamless IoT Data Platform',
-  description: 'A modern, elegant IoT data platform for collecting, visualizing, and analyzing sensor data. Built with Next.js, PostgreSQL, and real-time charts.',
+  description: 'A modern IoT data platform for collecting, visualizing, and analyzing sensor data.',
   keywords: ['IoT', 'Pulse', 'sensor data', 'Arduino', 'ESP32', 'data visualization', 'API', 'ThingSpeak'],
   authors: [{ name: 'Pulse' }],
   openGraph: {
     title: 'Pulse',
-    description: 'Modern, elegant IoT data platform for seamless connectivity.',
+    description: 'Modern IoT data platform for seamless connectivity.',
     type: 'website',
   },
 }

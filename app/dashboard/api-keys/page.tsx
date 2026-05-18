@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Key, Plus, Trash2, RefreshCw, Copy, Check, Calendar, AlertCircle, Loader2 } from 'lucide-react'
+import { Key, Plus, Trash2, RefreshCw, Copy, Check, Calendar, AlertCircle, Loader2, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface ApiKey {
@@ -27,7 +28,7 @@ export default function ApiKeysPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isCreating, setIsCreating] = useState(false)
-  const [newKeyData, setNewKeyData] = useState<{ name: string; expiresInDays: number } | null>(null)
+  const [newKeyData, setNewKeyData] = useState<{ key: string; expiresAt: string } | null>(null)
   const [showNewKey, setShowNewKey] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -133,12 +134,12 @@ export default function ApiKeysPage() {
     const isExpired = new Date() > new Date(expiresAt)
     
     if (status === 'REVOKED') {
-      return <Badge variant="destructive">Revoked</Badge>
+      return <Badge variant="destructive" className="rounded-full">Revoked</Badge>
     }
     if (status === 'EXPIRED' || isExpired) {
-      return <Badge variant="secondary">Expired</Badge>
+      return <Badge variant="secondary" className="rounded-full">Expired</Badge>
     }
-    return <Badge variant="default" className="bg-green-500">Active</Badge>
+    return <Badge className="rounded-full bg-gradient-to-r from-emerald-500 to-green-500">Active</Badge>
   }
 
   return (
@@ -146,19 +147,19 @@ export default function ApiKeysPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">API Keys</h1>
+          <h1 className="text-3xl font-bold tracking-tight">API Keys</h1>
           <p className="text-muted-foreground mt-1">
             Manage your API keys for IoT data access
           </p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/20">
               <Plus className="w-4 h-4 mr-2" />
               New API Key
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="rounded-2xl">
             <DialogHeader>
               <DialogTitle>Create API Key</DialogTitle>
               <DialogDescription>
@@ -173,6 +174,7 @@ export default function ApiKeysPage() {
                   placeholder="e.g., Arduino Sensor #1"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="rounded-xl"
                 />
               </div>
               <div className="space-y-2">
@@ -181,7 +183,7 @@ export default function ApiKeysPage() {
                   value={formData.expiresInDays}
                   onValueChange={(v) => setFormData({ ...formData, expiresInDays: v })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -194,10 +196,10 @@ export default function ApiKeysPage() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="rounded-xl">
                 Cancel
               </Button>
-              <Button onClick={createApiKey} disabled={isCreating}>
+              <Button onClick={createApiKey} disabled={isCreating} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600">
                 {isCreating ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Plus className="w-4 h-4 mr-2" />}
                 Create Key
               </Button>
@@ -208,9 +210,9 @@ export default function ApiKeysPage() {
 
       {/* New Key Alert */}
       {showNewKey && newKeyData && (
-        <Card className="border-accent bg-accent/5">
+        <Card className="border-violet-500/30 bg-gradient-to-br from-violet-500/5 to-indigo-500/5 rounded-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-accent">
+            <CardTitle className="flex items-center gap-2 text-violet-600 dark:text-violet-400">
               <Key className="w-5 h-5" />
               Your New API Key
             </CardTitle>
@@ -220,13 +222,14 @@ export default function ApiKeysPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-background p-3 rounded font-mono text-sm break-all">
+              <code className="flex-1 bg-background/80 backdrop-blur-sm p-3 rounded-xl font-mono text-sm break-all border border-border/50">
                 {newKeyData.key}
               </code>
               <Button 
                 variant="outline" 
                 size="icon"
                 onClick={() => copyToClipboard(newKeyData.key, 'new')}
+                className="rounded-xl shrink-0"
               >
                 {copiedId === 'new' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
@@ -235,7 +238,7 @@ export default function ApiKeysPage() {
               <Calendar className="w-4 h-4" />
               Expires: {new Date(newKeyData.expiresAt).toLocaleDateString()}
             </div>
-            <Button onClick={() => setShowNewKey(false)} variant="outline" className="w-full">
+            <Button onClick={() => setShowNewKey(false)} variant="outline" className="w-full rounded-xl">
               I&apos;ve Saved My Key
             </Button>
           </CardContent>
@@ -246,18 +249,20 @@ export default function ApiKeysPage() {
       {isLoading ? (
         <div className="space-y-4">
           {Array(3).fill(null).map((_, i) => (
-            <Skeleton key={i} className="h-24" />
+            <Skeleton key={i} className="h-28 rounded-2xl" />
           ))}
         </div>
       ) : apiKeys.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Key className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No API keys yet</h3>
-            <p className="text-muted-foreground text-center max-w-md mb-4">
+        <Card className="border-border/50 rounded-2xl">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 flex items-center justify-center mb-4">
+              <Key className="w-8 h-8 text-violet-500" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">No API keys yet</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-6">
               Create an API key to start sending data from your IoT devices
             </p>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={() => setIsDialogOpen(true)} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600">
               <Plus className="w-4 h-4 mr-2" />
               Create API Key
             </Button>
@@ -266,32 +271,32 @@ export default function ApiKeysPage() {
       ) : (
         <div className="space-y-4">
           {apiKeys.map((apiKey) => (
-            <Card key={apiKey.id}>
+            <Card key={apiKey.id} className="group border-border/50 hover:border-violet-500/30 transition-all duration-300 rounded-2xl">
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
-                      <h3 className="font-medium">{apiKey.name || 'Unnamed Key'}</h3>
+                      <h3 className="font-bold">{apiKey.name || 'Unnamed Key'}</h3>
                       {getStatusBadge(apiKey.status, apiKey.expiresAt)}
                     </div>
-                    <code className="text-sm font-mono text-muted-foreground bg-muted px-2 py-1 rounded">
-                      {apiKey.key}
-                    </code>
+                    <div className="bg-muted/30 rounded-xl p-3 border border-border/50">
+                      <code className="text-sm font-mono text-muted-foreground break-all">
+                        {apiKey.key}
+                      </code>
+                    </div>
                     <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
+                      <span className="flex items-center gap-1.5">
+                        <Calendar className="w-4 h-4 text-violet-500/70" />
                         Created: {new Date(apiKey.createdAt).toLocaleDateString()}
                       </span>
-                      <span className="flex items-center gap-1">
-                        <AlertCircle className="w-4 h-4" />
+                      <span className="flex items-center gap-1.5">
+                        <AlertCircle className="w-4 h-4 text-amber-500/70" />
                         Expires: {new Date(apiKey.expiresAt).toLocaleDateString()}
                       </span>
                       {apiKey.lastUsedAt && (
-                        <span className="flex items-center gap-1">
-                          Last used: {new Date(apiKey.lastUsedAt).toLocaleDateString()}
-                        </span>
+                        <span>Last used: {new Date(apiKey.lastUsedAt).toLocaleDateString()}</span>
                       )}
-                      <span>{apiKey.requestCount.toLocaleString()} requests</span>
+                      <span className="font-medium">{apiKey.requestCount.toLocaleString()} requests</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -299,6 +304,7 @@ export default function ApiKeysPage() {
                       variant="outline"
                       size="icon"
                       onClick={() => copyToClipboard(apiKey.key.replace('...', ''), apiKey.id)}
+                      className="rounded-xl shrink-0"
                     >
                       {copiedId === apiKey.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                     </Button>
@@ -306,6 +312,7 @@ export default function ApiKeysPage() {
                       variant="outline"
                       size="icon"
                       onClick={() => regenerateApiKey(apiKey.id)}
+                      className="rounded-xl shrink-0"
                     >
                       <RefreshCw className="w-4 h-4" />
                     </Button>
@@ -313,7 +320,7 @@ export default function ApiKeysPage() {
                       variant="outline"
                       size="icon"
                       onClick={() => revokeApiKey(apiKey.id)}
-                      className="text-destructive hover:bg-destructive/10"
+                      className="rounded-xl shrink-0 text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
@@ -326,34 +333,36 @@ export default function ApiKeysPage() {
       )}
 
       {/* API Documentation */}
-      <Card>
+      <Card className="border-border/50 rounded-2xl">
         <CardHeader>
-          <CardTitle>API Documentation</CardTitle>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Shield className="w-5 h-5 text-violet-500" />
+            API Documentation
+          </CardTitle>
           <CardDescription>How to use your API keys</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
+        <CardContent className="space-y-6">
+          <div className="space-y-3 bg-muted/30 rounded-xl p-4">
             <h4 className="font-medium text-sm">Upload Data</h4>
-            <div className="bg-muted rounded-lg p-4 font-mono text-sm">
-              <p className="text-green-600">POST /api/data/upload</p>
+            <div className="bg-background rounded-xl p-4 font-mono text-sm border border-border/50">
+              <p className="text-emerald-600 dark:text-emerald-400 font-semibold">POST /api/data/upload</p>
               <p className="text-muted-foreground mt-2">Body (JSON):</p>
-              <pre className="mt-1">
+              <pre className="mt-1 text-xs">
 {`{
   "api_key": "your_api_key_here",
   "channel_id": "your_channel_id",
   "field1": 25.5,
-  "field2": 60.0,
-  "status": "ok"
+  "field2": 60.0
 }`}
               </pre>
             </div>
           </div>
-          <div className="space-y-2">
-            <h4 className="font-medium text-sm">Using Channel Write Key (Simpler)</h4>
-            <div className="bg-muted rounded-lg p-4 font-mono text-sm">
-              <p className="text-green-600">POST /api/data/upload</p>
+          <div className="space-y-3 bg-muted/30 rounded-xl p-4">
+            <h4 className="font-medium text-sm">Using Channel Write Key</h4>
+            <div className="bg-background rounded-xl p-4 font-mono text-sm border border-border/50">
+              <p className="text-emerald-600 dark:text-emerald-400 font-semibold">POST /api/data/upload</p>
               <p className="text-muted-foreground mt-2">Body (JSON):</p>
-              <pre className="mt-1">
+              <pre className="mt-1 text-xs">
 {`{
   "write_api_key": "channel_write_key",
   "field1": 25.5,

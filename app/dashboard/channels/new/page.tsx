@@ -73,22 +73,24 @@ export default function NewChannelPage() {
     <div className="max-w-2xl mx-auto">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" asChild className="rounded-xl">
           <Link href="/dashboard/channels">
             <ArrowLeft className="w-5 h-5" />
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-semibold">Create Channel</h1>
+          <h1 className="text-2xl font-bold">Create Channel</h1>
           <p className="text-muted-foreground">Set up a new IoT data channel</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
-        <Card>
+        <Card className="border-border/50 rounded-2xl">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Radio className="w-5 h-5" />
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white">
+                <Radio className="w-4 h-4" />
+              </div>
               Channel Details
             </CardTitle>
             <CardDescription>
@@ -106,6 +108,7 @@ export default function NewChannelPage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
+                  className="h-11 rounded-xl"
                 />
               </div>
 
@@ -117,10 +120,11 @@ export default function NewChannelPage() {
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
+                  className="rounded-xl"
                 />
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between p-4 bg-muted/30 rounded-xl">
                 <div className="space-y-0.5">
                   <Label htmlFor="isPublic">Public Channel</Label>
                   <p className="text-sm text-muted-foreground">
@@ -142,7 +146,7 @@ export default function NewChannelPage() {
               <div>
                 <h3 className="font-medium">Field Labels</h3>
                 <p className="text-sm text-muted-foreground">
-                  Define labels for up to 8 data fields (like ThingSpeak)
+                  Define labels for up to 8 data fields
                 </p>
               </div>
 
@@ -153,8 +157,9 @@ export default function NewChannelPage() {
                     <Input
                       id={`field${i + 1}Label`}
                       placeholder={`e.g., ${['Temperature', 'Humidity', 'Pressure', 'Light', 'Voltage', 'Current', 'CO2', 'Motion'][i]}`}
-                      value={formData[`field${i + 1}Label` as keyof typeof formData]}
+                      value={formData[`field${i + 1}Label` as keyof typeof formData] as string}
                       onChange={(e) => setFormData({ ...formData, [`field${i + 1}Label`]: e.target.value })}
+                      className="rounded-xl"
                     />
                   </div>
                 ))}
@@ -164,10 +169,10 @@ export default function NewChannelPage() {
         </Card>
 
         <div className="flex items-center justify-end gap-4 mt-6">
-          <Button type="button" variant="outline" asChild>
+          <Button type="button" variant="outline" asChild className="rounded-xl">
             <Link href="/dashboard/channels">Cancel</Link>
           </Button>
-          <Button type="submit" disabled={isLoading}>
+          <Button type="submit" disabled={isLoading} className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
             {isLoading ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />

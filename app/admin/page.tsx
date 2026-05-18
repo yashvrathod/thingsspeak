@@ -1,9 +1,9 @@
 'use client'
 
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { TrendingUp, Package, Users, Zap } from 'lucide-react'
+import { TrendingUp, Package, Users, Zap, Activity } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-// Mock data
 const chartData = [
   { name: 'Jan', devices: 120, dataPoints: 2400 },
   { name: 'Feb', devices: 150, dataPoints: 2210 },
@@ -22,17 +22,17 @@ const recentActivity = [
 
 export default function Dashboard() {
   const stats = [
-    { label: 'Active Devices', value: '1,234', icon: Zap, trend: '+12%' },
-    { label: 'Total Users', value: '892', icon: Users, trend: '+8%' },
-    { label: 'Projects', value: '24', icon: Package, trend: '+2' },
-    { label: 'Data Points', value: '2.4M', icon: TrendingUp, trend: '+23%' },
+    { label: 'Active Devices', value: '1,234', icon: Zap, trend: '+12%', gradient: 'from-violet-500 to-purple-500' },
+    { label: 'Total Users', value: '892', icon: Users, trend: '+8%', gradient: 'from-blue-500 to-cyan-500' },
+    { label: 'Projects', value: '24', icon: Package, trend: '+2', gradient: 'from-emerald-500 to-green-500' },
+    { label: 'Data Points', value: '2.4M', icon: TrendingUp, trend: '+23%', gradient: 'from-orange-500 to-amber-500' },
   ]
 
   return (
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-semibold text-foreground mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Dashboard</h1>
         <p className="text-muted-foreground">Welcome back. Here&apos;s what&apos;s happening with your IoT devices.</p>
       </div>
 
@@ -41,15 +41,15 @@ export default function Dashboard() {
         {stats.map((stat) => {
           const Icon = stat.icon
           return (
-            <div key={stat.label} className="bg-card rounded-lg border border-border p-6">
+            <div key={stat.label} className="relative group p-6 rounded-2xl bg-card border border-border/50 hover:border-violet-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5">
               <div className="flex items-start justify-between mb-4">
-                <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-accent" />
+                <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br", stat.gradient, "flex items-center justify-center shadow-lg")}>
+                  <Icon className="w-6 h-6 text-white" />
                 </div>
-                <span className="text-sm font-medium text-accent">{stat.trend}</span>
+                <span className="text-sm font-medium text-emerald-500">{stat.trend}</span>
               </div>
               <p className="text-muted-foreground text-sm mb-1">{stat.label}</p>
-              <p className="text-2xl font-semibold text-foreground">{stat.value}</p>
+              <p className="text-3xl font-bold text-foreground">{stat.value}</p>
             </div>
           )
         })}
@@ -57,19 +57,22 @@ export default function Dashboard() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Line Chart */}
-        <div className="bg-card rounded-lg border border-border p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Device Growth</h2>
+        <div className="rounded-2xl bg-card border border-border/50 p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-violet-500" />
+            Device Growth
+          </h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis stroke="var(--muted-foreground)" />
-              <YAxis stroke="var(--muted-foreground)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.5} />
+              <XAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'var(--card)',
-                  border: `1px solid var(--border)`,
-                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.75rem',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
                 }}
                 labelStyle={{ color: 'var(--foreground)' }}
               />
@@ -77,34 +80,37 @@ export default function Dashboard() {
               <Line
                 type="monotone"
                 dataKey="devices"
-                stroke="var(--chart-1)"
+                stroke="#8b5cf6"
                 strokeWidth={2}
-                dot={{ fill: 'var(--chart-1)' }}
+                dot={{ fill: '#8b5cf6', strokeWidth: 0 }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Bar Chart */}
-        <div className="bg-card rounded-lg border border-border p-6">
-          <h2 className="text-lg font-semibold text-foreground mb-4">Data Collection</h2>
+        <div className="rounded-2xl bg-card border border-border/50 p-6">
+          <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-indigo-500" />
+            Data Collection
+          </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis stroke="var(--muted-foreground)" />
-              <YAxis stroke="var(--muted-foreground)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" strokeOpacity={0.5} />
+              <XAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
+              <YAxis stroke="var(--muted-foreground)" tickLine={false} axisLine={false} />
               <Tooltip
                 contentStyle={{
                   backgroundColor: 'var(--card)',
-                  border: `1px solid var(--border)`,
-                  borderRadius: '0.5rem',
+                  border: '1px solid var(--border)',
+                  borderRadius: '0.75rem',
+                  boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
                 }}
                 labelStyle={{ color: 'var(--foreground)' }}
               />
               <Legend />
               <Bar
                 dataKey="dataPoints"
-                fill="var(--chart-2)"
+                fill="#8b5cf6"
                 radius={[8, 8, 0, 0]}
               />
             </BarChart>
@@ -113,14 +119,20 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-card rounded-lg border border-border p-6">
-        <h2 className="text-lg font-semibold text-foreground mb-4">Recent Activity</h2>
-        <div className="space-y-3">
+      <div className="rounded-2xl bg-card border border-border/50 p-6">
+        <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+          <Activity className="w-5 h-5 text-violet-500" />
+          Recent Activity
+        </h2>
+        <div className="space-y-1">
           {recentActivity.map((activity) => (
-            <div key={activity.id} className="flex items-center justify-between py-3 border-b border-border last:border-b-0">
-              <div>
-                <p className="text-sm font-medium text-foreground">{activity.action}</p>
-                <p className="text-xs text-muted-foreground">{activity.device}</p>
+            <div key={activity.id} className="flex items-center justify-between py-3 px-4 rounded-xl hover:bg-muted/30 transition-colors">
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 rounded-full bg-violet-500/50" />
+                <div>
+                  <p className="text-sm font-medium text-foreground">{activity.action}</p>
+                  <p className="text-xs text-muted-foreground">{activity.device}</p>
+                </div>
               </div>
               <p className="text-xs text-muted-foreground">{activity.time}</p>
             </div>

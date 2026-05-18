@@ -40,6 +40,15 @@ interface Channel {
   }
 }
 
+const gradients = [
+  'from-blue-500 to-cyan-500',
+  'from-violet-500 to-purple-500',
+  'from-pink-500 to-rose-500',
+  'from-orange-500 to-amber-500',
+  'from-emerald-500 to-green-500',
+  'from-sky-500 to-blue-500',
+]
+
 export default function ChannelsPage() {
   const [channels, setChannels] = useState<Channel[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -89,12 +98,12 @@ export default function ChannelsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold">Channels</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Channels</h1>
           <p className="text-muted-foreground mt-1">
             Manage your IoT data channels
           </p>
         </div>
-        <Button asChild>
+        <Button asChild className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 shadow-lg shadow-violet-500/20">
           <Link href="/dashboard/channels/new">
             <Plus className="w-4 h-4 mr-2" />
             New Channel
@@ -106,18 +115,20 @@ export default function ChannelsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array(6).fill(null).map((_, i) => (
-            <Skeleton key={i} className="h-48" />
+            <Skeleton key={i} className="h-48 rounded-2xl" />
           ))}
         </div>
       ) : channels.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <Radio className="w-12 h-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No channels yet</h3>
-            <p className="text-muted-foreground text-center mb-4 max-w-md">
+        <Card className="border-border/50 rounded-2xl">
+          <CardContent className="flex flex-col items-center justify-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/10 to-indigo-500/10 flex items-center justify-center mb-4">
+              <Radio className="w-8 h-8 text-violet-500" />
+            </div>
+            <h3 className="text-xl font-bold mb-2">No channels yet</h3>
+            <p className="text-muted-foreground text-center mb-6 max-w-md">
               Create your first channel to start collecting IoT data. Channels organize your data streams.
             </p>
-            <Button asChild>
+            <Button asChild className="rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
               <Link href="/dashboard/channels/new">
                 <Plus className="w-4 h-4 mr-2" />
                 Create Channel
@@ -127,38 +138,32 @@ export default function ChannelsPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {channels.map((channel) => (
-            <Card key={channel.id} className="group hover:shadow-md transition-shadow">
+          {channels.map((channel, index) => (
+            <Card key={channel.id} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border-border/50 hover:border-violet-500/30 rounded-2xl overflow-hidden">
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                      <Radio className="w-5 h-5 text-accent" />
+                  <div className="flex items-center gap-3">
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradients[index % gradients.length]} flex items-center justify-center shadow-lg shrink-0`}>
+                      <Radio className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <CardTitle className="text-lg">{channel.name}</CardTitle>
-                      <CardDescription className="text-xs">
+                      <CardTitle className="text-lg font-bold">{channel.name}</CardTitle>
+                      <CardDescription className="text-xs mt-0.5">
                         {channel._count.dataPoints.toLocaleString()} data points
                       </CardDescription>
                     </div>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
                         <MoreVertical className="w-4 h-4" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="rounded-xl border-border/50">
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/channels/${channel.id}`}>
                           <Eye className="w-4 h-4 mr-2" />
                           View Details
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href={`/dashboard/channels/${channel.id}/edit`}>
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          Edit
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
@@ -181,12 +186,12 @@ export default function ChannelsPage() {
                 
                 <div className="flex items-center gap-2 mb-3">
                   {channel.isPublic ? (
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="secondary" className="text-xs rounded-full">
                       <Eye className="w-3 h-3 mr-1" />
                       Public
                     </Badge>
                   ) : (
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-xs rounded-full">
                       <EyeOff className="w-3 h-3 mr-1" />
                       Private
                     </Badge>
@@ -195,21 +200,11 @@ export default function ChannelsPage() {
 
                 {/* Field Labels Preview */}
                 <div className="flex flex-wrap gap-1">
-                  {[channel.field1Label, channel.field2Label, channel.field3Label, channel.field4Label]
-                    .filter(Boolean)
-                    .slice(0, 4)
-                    .map((label, i) => (
-                      <Badge key={i} variant="outline" className="text-xs">
-                        {label}
-                      </Badge>
-                    ))}
-                  {[channel.field1Label, channel.field2Label, channel.field3Label, channel.field4Label]
-                    .filter(Boolean).length > 4 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{[channel.field1Label, channel.field2Label, channel.field3Label, channel.field4Label]
-                        .filter(Boolean).length - 4}
+                  {[channel.field1Label, channel.field2Label].filter(Boolean).map((label, i) => (
+                    <Badge key={i} variant="outline" className="text-xs rounded-full bg-muted/30">
+                      {label}
                     </Badge>
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -219,19 +214,18 @@ export default function ChannelsPage() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!channelToDelete} onOpenChange={() => setChannelToDelete(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-2xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Channel</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &quot;{channelToDelete?.name}&quot;? This action cannot be undone.
-              All data points in this channel will be permanently deleted.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
             <AlertDialogAction 
               onClick={() => channelToDelete && deleteChannel(channelToDelete.id)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
             </AlertDialogAction>
