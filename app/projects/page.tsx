@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { 
   Search, 
@@ -46,6 +47,7 @@ interface Project {
 }
 
 export default function ProjectsPage() {
+  const { data: session } = useSession()
   const [projects, setProjects] = useState<Project[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -109,7 +111,9 @@ export default function ProjectsPage() {
               Home
             </Link>
             <Button asChild size="sm">
-              <Link href="/auth/signup">Get Started</Link>
+              <Link href={session?.user ? '/dashboard' : '/auth/signup'}>
+                {session?.user ? 'Dashboard' : 'Get Started'}
+              </Link>
             </Button>
           </div>
         </div>

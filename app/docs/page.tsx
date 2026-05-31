@@ -1,5 +1,6 @@
 'use client'
 
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { 
   BookOpen, 
@@ -49,6 +50,7 @@ function CodeBlock({ code, language = 'cpp' }: { code: string; language?: string
 }
 
 export default function DocsPage() {
+  const { data: session } = useSession()
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -66,7 +68,9 @@ export default function DocsPage() {
               Dashboard
             </Link>
             <Button asChild size="sm">
-              <Link href="/auth/signup">Get Started</Link>
+              <Link href={session?.user ? '/dashboard' : '/auth/signup'}>
+                {session?.user ? 'Dashboard' : 'Get Started'}
+              </Link>
             </Button>
           </div>
         </div>
