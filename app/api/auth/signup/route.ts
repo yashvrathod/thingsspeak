@@ -1,9 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
 import { prisma } from '@/lib/db'
+import { checkRateLimit } from '@/lib/rate-limit'
 
-// POST /api/auth/signup - Create a new user
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
+    const { allowed } = await checkRateLimit(`signup:${ip}`, 5, 300_000)
+    if (!allowed) {
+      return NextResponse.json({ error: 'Too many sign-up attempts. Please try again later.' }, { status: 429 })
+    }
+
     const body = await request.json()
     const { name, email, password } = body
 
@@ -11,7 +18,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    // Check if user already exists
+    if (password.length < 8) {
+      return NextResponse.json({ error: 'Password must be at least 8 characters long' }, { status: 400 })
+    }
+
     const existingUser = await prisma.user.findUnique({
       where: { email },
     })
@@ -20,12 +30,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User already exists' }, { status: 409 })
     }
 
-    // Create user (password is already hashed from client)
+    const hashedPassword = await bcrypt.hash(password, 12)
+
     const user = await prisma.user.create({
       data: {
         email,
         name,
-        password,
+        password: hashedPassword,
       },
       select: {
         id: true,

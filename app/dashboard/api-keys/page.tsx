@@ -87,11 +87,11 @@ export default function ApiKeysPage() {
   const revokeApiKey = async (keyId: string) => {
     try {
       const response = await fetch(`/api/api-keys?id=${keyId}`, {
-        method: 'DELETE',
+        method: 'PATCH',
       })
 
       if (response.ok) {
-        setApiKeys(apiKeys.filter(k => k.id !== keyId))
+        fetchApiKeys()
         toast.success('API key revoked')
       } else {
         toast.error('Failed to revoke API key')
@@ -123,11 +123,22 @@ export default function ApiKeysPage() {
     }
   }
 
-  const copyToClipboard = (key: string, id: string) => {
-    navigator.clipboard.writeText(key)
-    setCopiedId(id)
-    toast.success('Copied to clipboard')
-    setTimeout(() => setCopiedId(null), 2000)
+  const copyToClipboard = async (key: string, id: string) => {
+    try {
+      await navigator.clipboard.writeText(key)
+      setCopiedId(id)
+      toast.success('Copied to clipboard')
+      setTimeout(() => setCopiedId(null), 2000)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
+  }
+
+  const maskKey = (key: string) => {
+    if (key.length > 12) {
+      return `${key.slice(0, 8)}...${key.slice(-4)}`
+    }
+    return key
   }
 
   const getStatusBadge = (status: string, expiresAt: string) => {
@@ -281,7 +292,7 @@ export default function ApiKeysPage() {
                     </div>
                     <div className="bg-muted/30 rounded-xl p-3 border border-border/50">
                       <code className="text-sm font-mono text-muted-foreground break-all">
-                        {apiKey.key}
+                        {maskKey(apiKey.key)}
                       </code>
                     </div>
                     <div className="flex flex-wrap items-center gap-4 mt-3 text-sm text-muted-foreground">
@@ -303,7 +314,7 @@ export default function ApiKeysPage() {
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => copyToClipboard(apiKey.key.replace('...', ''), apiKey.id)}
+                      onClick={() => copyToClipboard(apiKey.key, apiKey.id)}
                       className="rounded-xl shrink-0"
                     >
                       {copiedId === apiKey.id ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}

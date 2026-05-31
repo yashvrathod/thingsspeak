@@ -57,10 +57,10 @@ interface Channel {
 
 export default function ChannelDetailPage() {
   const params = useParams()
-  const channelId = params.id as string
+  const channelId = (params?.id as string) || ''
   
   const [channel, setChannel] = useState<Channel | null>(null)
-  const [data, setData] = useState<any[]>([])
+  const [data, setData] = useState<Record<string, unknown>[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
 
@@ -86,11 +86,15 @@ export default function ChannelDetailPage() {
     }
   }
 
-  const handleCopyKey = (key: string, type: string) => {
-    navigator.clipboard.writeText(key)
-    setCopiedKey(type)
-    toast.success(`${type} key copied to clipboard`)
-    setTimeout(() => setCopiedKey(null), 2000)
+  const handleCopyKey = async (key: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(key)
+      setCopiedKey(type)
+      toast.success(`${type} key copied to clipboard`)
+      setTimeout(() => setCopiedKey(null), 2000)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
   }
 
   const handleExport = async (format: 'json' | 'csv') => {

@@ -81,16 +81,12 @@ export default function ProjectDetailPage() {
   const fetchProject = async () => {
     try {
       setIsLoading(true)
-      console.log('Fetching project with ID:', projectId)
       const response = await fetch(`/api/projects/${projectId}`)
-      console.log('Response status:', response.status)
       if (response.ok) {
         const data = await response.json()
-        console.log('Project data:', data)
         setProject(data.project)
       } else {
         const error = await response.json()
-        console.error('API error:', error)
         toast.error(error.error || 'Project not found')
         setProject(null)
       }
@@ -125,11 +121,15 @@ export default function ProjectDetailPage() {
     }
   }
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text)
-    setCopiedKey(true)
-    toast.success('Copied to clipboard!')
-    setTimeout(() => setCopiedKey(false), 2000)
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      setCopiedKey(true)
+      toast.success('Copied to clipboard!')
+      setTimeout(() => setCopiedKey(false), 2000)
+    } catch {
+      toast.error('Failed to copy to clipboard')
+    }
   }
 
   const getDifficultyColor = (difficulty: string) => {
@@ -189,9 +189,6 @@ export default function ProjectDetailPage() {
             Back to Projects
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-              Dashboard
-            </Link>
           </div>
         </div>
       </header>
@@ -538,7 +535,7 @@ export default function ProjectDetailPage() {
               <Button asChild variant="outline">
                 <a href={project.driveLink} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="w-4 h-4 mr-2" />
-                  Open Google Drive
+                  Download Project File
                 </a>
               </Button>
             </CardContent>

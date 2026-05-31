@@ -3,8 +3,19 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, Key, Settings, Users, Activity, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useSession } from 'next-auth/react'
+import { ErrorBoundary } from '@/components/error-boundary'
 import { cn } from '@/lib/utils'
+import { 
+  LayoutDashboard, 
+  Package, 
+  Key, 
+  Users, 
+  Settings,
+  Activity,
+  ChevronLeft,
+  ChevronRight 
+} from 'lucide-react'
 
 export default function AdminLayout({
   children,
@@ -41,7 +52,7 @@ export default function AdminLayout({
         <nav className="flex-1 overflow-y-auto px-3 py-6 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon
-            const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
+            const isActive = pathname === item.href || (pathname?.startsWith(item.href + '/') ?? false)
             return (
               <Link
                 key={item.href}
@@ -87,7 +98,7 @@ export default function AdminLayout({
           </div>
           <h1 className="text-lg font-bold tracking-tight text-foreground">Admin Panel</h1>
         </div>
-        <div className="p-8 max-w-7xl mx-auto">{children}</div>
+        <div className="p-8 max-w-7xl mx-auto"><ErrorBoundary>{children}</ErrorBoundary></div>
       </main>
     </div>
   )

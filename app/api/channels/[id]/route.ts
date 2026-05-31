@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { getChannelById, updateChannel, deleteChannel, regenerateChannelKeys } from '@/lib/channels'
+import { getChannelById, updateChannel, deleteChannel } from '@/lib/channels'
 import { getChannelDataPoints, formatDataForChart, getChannelDataPointsCount } from '@/lib/data'
 
 // GET /api/channels/[id] - Get channel details
@@ -15,7 +15,6 @@ export async function GET(
     const searchParams = request.nextUrl.searchParams
     const includeData = searchParams.get('data') === 'true'
     const dataLimit = parseInt(searchParams.get('limit') || '100')
-    const hours = parseInt(searchParams.get('hours') || '24')
 
     const channel = await getChannelById(id, session?.user?.id)
     
@@ -23,7 +22,7 @@ export async function GET(
       return NextResponse.json({ error: 'Channel not found' }, { status: 404 })
     }
 
-    const response: any = { channel }
+    const response: Record<string, unknown> = { channel }
 
     if (includeData) {
       // Get recent data points

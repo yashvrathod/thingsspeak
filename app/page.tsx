@@ -16,10 +16,18 @@ import {
   BarChart3,
   Cloud,
   Zap,
-  Play
+  Play,
+  CheckCircle2,
+  Lock,
+  Search,
+  Server,
+  Globe,
+  Database
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+import { Reveal } from '@/components/animations/reveal'
+import { PulseIndicator } from '@/components/ui/pulse-indicator'
 
 function NavButtons() {
   const { data: session, status } = useSession()
@@ -28,375 +36,365 @@ function NavButtons() {
     return <div className="w-8 h-8" />
   }
   
-  if (session?.user) {
-    return (
-      <div className="flex items-center gap-6">
-        <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-          Docs
-        </Link>
-        <Link href="/projects" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-          Projects
-        </Link>
-        <Button asChild className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0 shadow-lg shadow-violet-500/20">
-          <Link href="/dashboard">Dashboard</Link>
-        </Button>
-      </div>
-    )
-  }
-  
   return (
     <div className="flex items-center gap-6">
       <Link href="/docs" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
         Docs
       </Link>
-      <Link href="/auth/signin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
-        Sign In
+      <Link href="/projects" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+        Templates
       </Link>
-      <Button asChild className="rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0 shadow-lg shadow-violet-500/20">
-        <Link href="/auth/signup">Get Started</Link>
-      </Button>
+      {session?.user ? (
+        <Button asChild className="rounded-md px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm">
+          <Link href="/dashboard">Dashboard</Link>
+        </Button>
+      ) : (
+        <div className="flex items-center gap-4">
+          <Link href="/auth/signin" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+            Sign In
+          </Link>
+          <Button asChild className="rounded-md px-5 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-sm">
+            <Link href="/auth/signup">Get Started</Link>
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
 
 function HeroButtons() {
   const { data: session } = useSession()
-  
+
   if (session?.user) {
     return (
-      <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-        <Button size="lg" asChild className="rounded-full px-8 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0 shadow-xl shadow-violet-500/25">
-          <Link href="/dashboard">
-            <LayoutDashboard className="w-4 h-4 mr-2" />
-            Go to Dashboard
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button size="lg" asChild className="rounded-md px-8 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md">
+          <Link href="/dashboard/channels/new">
+            Create Channel
+            <ArrowRight className="w-4 h-4 ml-2" />
           </Link>
         </Button>
-        <Button size="lg" variant="outline" asChild className="rounded-full px-8">
-          <Link href="/projects">Browse Projects</Link>
+        <Button size="lg" variant="outline" asChild className="rounded-md px-8 h-12 border-border hover:bg-accent hover:text-accent-foreground font-bold transition-all">
+          <Link href="/projects">
+            Browse Templates
+          </Link>
         </Button>
       </div>
     )
   }
-  
+
   return (
-    <div className="flex flex-col sm:flex-row gap-4 justify-center pt-8">
-      <Button size="lg" asChild className="rounded-full px-8 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white border-0 shadow-xl shadow-violet-500/25">
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Button size="lg" asChild className="rounded-md px-8 h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md">
         <Link href="/auth/signup">
-          Start for Free
+          Start Building
           <ArrowRight className="w-4 h-4 ml-2" />
         </Link>
       </Button>
-      <Button size="lg" variant="outline" asChild className="rounded-full px-8">
-        <Link href="/dashboard">
-          <Play className="w-4 h-4 mr-2" />
-          Live Demo
+      <Button size="lg" variant="outline" asChild className="rounded-md px-8 h-12 border-border hover:bg-accent hover:text-accent-foreground font-bold transition-all">
+        <Link href="/docs">
+          Request Demo
         </Link>
       </Button>
     </div>
   )
 }
 
-export default function Home() {
-  const features = [
-    {
-      icon: Radio,
-      title: 'Smart Channels',
-      description: 'Organize data streams with up to 8 customizable fields per channel.',
-      gradient: 'from-blue-500 to-cyan-500'
-    },
-    {
-      icon: Shield,
-      title: 'Secure by Design',
-      description: 'Granular API keys with time-based expiry and role-based access.',
-      gradient: 'from-violet-500 to-purple-500'
-    },
-    {
-      icon: BarChart3,
-      title: 'Real-time Analytics',
-      description: 'Beautiful, interactive charts that update as your sensors fire.',
-      gradient: 'from-pink-500 to-rose-500'
-    },
-    {
-      icon: Cpu,
-      title: 'Device First',
-      description: 'Ready-made libraries for ESP32, Arduino, and Raspberry Pi.',
-      gradient: 'from-orange-500 to-amber-500'
-    },
-    {
-      icon: RefreshCw,
-      title: 'Built-in Simulator',
-      description: 'Test your integrations instantly without needing physical hardware.',
-      gradient: 'from-emerald-500 to-green-500'
-    },
-    {
-      icon: Cloud,
-      title: 'Cloud Export',
-      description: 'Export your historical data to CSV or JSON with a single click.',
-      gradient: 'from-sky-500 to-blue-500'
-    },
-  ]
+function CtaButtons() {
+  const { data: session } = useSession()
+
+  if (session?.user) {
+    return (
+      <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <Button size="lg" asChild className="rounded-md h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg">
+          <Link href="/dashboard/channels/new">Create New Channel</Link>
+        </Button>
+        <Button size="lg" variant="outline" asChild className="rounded-md h-14 px-10 border-border font-bold">
+          <Link href="/projects">Explore Templates</Link>
+        </Button>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-background selection:bg-violet-500/20 selection:text-foreground">
-      {/* Background Glow */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[20%] left-1/4 w-[60%] h-[60%] bg-gradient-to-br from-violet-500/8 to-indigo-500/8 rounded-full blur-[120px]" />
-        <div className="absolute -bottom-[15%] right-1/4 w-[50%] h-[50%] bg-gradient-to-tl from-blue-500/6 to-cyan-500/6 rounded-full blur-[120px]" />
-      </div>
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Button size="lg" asChild className="rounded-md h-14 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-lg">
+        <Link href="/auth/signup">Create Free Account</Link>
+      </Button>
+      <Button size="lg" variant="outline" asChild className="rounded-md h-14 px-10 border-border font-bold">
+        <Link href="/docs">Read Documentation</Link>
+      </Button>
+    </div>
+  )
+}
 
+export default function Home() {
+  return (
+    <div className="min-h-screen bg-background text-foreground selection:bg-primary/10 selection:text-primary pro-grid">
       {/* Navigation */}
-      <nav className="border-b border-border/40 bg-background/60 backdrop-blur-xl sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg group-hover:shadow-violet-500/30">
+      <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white shadow-sm">
               <Activity className="w-5 h-5" />
             </div>
-            <span className="font-bold text-xl tracking-tight">Pulse</span>
+            <span className="font-bold text-lg tracking-tight">Pulse IoT</span>
           </Link>
           <NavButtons />
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative pt-24 pb-20 md:pt-32 md:pb-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/20 bg-violet-500/5 text-sm font-medium text-violet-600 dark:text-violet-400 mb-8">
-            <Zap className="w-4 h-4" />
-            Introducing Pulse v1.0
-            <ArrowRight className="w-4 h-4" />
-          </div>
+      <section className="relative pt-24 pb-20 md:pt-32 md:pb-40 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+          <Reveal>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-xs font-bold text-primary uppercase tracking-wider mb-8">
+              <Server className="w-3.5 h-3.5" />
+              Enterprise-Grade IoT Infrastructure
+            </div>
+          </Reveal>
           
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-tight mb-8 max-w-5xl mx-auto leading-[1.05]">
-            <span className="block text-foreground">Collect IoT Data</span>
-            <span className="block bg-gradient-to-r from-violet-600 via-indigo-500 to-blue-500 bg-clip-text text-transparent">Like Never Before</span>
-          </h1>
+          <Reveal delay={0.1}>
+            <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 max-w-4xl mx-auto leading-[1.1] text-slate-900 dark:text-white">
+              Industrial Data Visualization <br />
+              <span className="text-primary">Simplified for Scale.</span>
+            </h1>
+          </Reveal>
           
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
-            The elegant way to collect, visualize, and analyze your sensor data. 
-            Built for developers who value simplicity and speed.
-          </p>
+          <Reveal delay={0.2}>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+              Connect thousands of devices, collect real-time sensor data, and gain 
+              actionable insights with our high-performance visualization engine.
+            </p>
+          </Reveal>
           
-          <HeroButtons />
+          <Reveal delay={0.3}>
+            <HeroButtons />
+          </Reveal>
 
-          {/* Hero Dashboard Preview */}
-          <div className="mt-20 relative max-w-4xl mx-auto">
-            <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/20 via-indigo-500/20 to-blue-500/20 rounded-2xl blur-xl" />
-            <div className="relative rounded-2xl border border-border/60 bg-card/80 backdrop-blur-xl shadow-2xl overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-muted/30">
-                <div className="flex gap-1.5">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-                  <div className="w-3 h-3 rounded-full bg-green-500/80" />
-                </div>
-                <div className="flex-1 text-center">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-background/60 text-xs text-muted-foreground">
-                    app.pulse.io/dashboard
-                  </div>
-                </div>
-              </div>
-              <div className="p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { label: 'Temperature', value: '24.8°C', trend: '+2.1%', gradient: 'from-orange-500 to-amber-500' },
-                  { label: 'Humidity', value: '58.2%', trend: '-1.3%', gradient: 'from-blue-500 to-cyan-500' },
-                  { label: 'Pressure', value: '1013 hPa', trend: '+0.5%', gradient: 'from-violet-500 to-purple-500' },
-                  { label: 'Status', value: 'Online', trend: '99.9%', gradient: 'from-emerald-500 to-green-500' },
-                ].map((stat) => (
-                  <div key={stat.label} className="p-4 rounded-xl bg-muted/30 border border-border/40">
-                    <div className={cn("w-8 h-8 rounded-lg bg-gradient-to-br", stat.gradient, "flex items-center justify-center mb-3")}>
-                      <Activity className="w-4 h-4 text-white" />
+          {/* Structured Preview */}
+          <Reveal delay={0.5} distance={40} className="mt-20">
+            <div className="relative max-w-5xl mx-auto">
+              <div className="absolute inset-0 bg-primary/5 rounded-xl blur-3xl -z-10" />
+              <div className="rounded-xl border border-border bg-card shadow-2xl overflow-hidden text-left">
+                <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted/30">
+                  <div className="flex items-center gap-4">
+                    <div className="flex gap-1.5">
+                      <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
+                      <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
+                      <div className="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-700" />
                     </div>
-                    <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                    <p className="text-xl font-bold">{stat.value}</p>
-                    <p className="text-xs text-emerald-500 mt-1">{stat.trend}</p>
+                    <span className="text-xs font-medium text-muted-foreground font-mono">system_v4.2 // dashboard</span>
                   </div>
-                ))}
+                  <div className="flex items-center gap-2">
+                    <PulseIndicator color="emerald" size="sm" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">Syncing_Live</span>
+                  </div>
+                </div>
+                <div className="p-6 md:p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    {[
+                      { label: 'Active Nodes', value: '1,284', icon: Server, color: 'text-blue-600' },
+                      { label: 'Inbound Rate', value: '14.2k/s', icon: Activity, color: 'text-emerald-600' },
+                      { label: 'Network Health', value: '99.98%', icon: Shield, color: 'text-indigo-600' },
+                    ].map((s) => (
+                      <div key={s.label} className="p-5 rounded-lg border border-border bg-background hover:border-primary/50 transition-colors">
+                        <div className="flex items-center justify-between mb-4">
+                          <s.icon className={cn("w-5 h-5", s.color)} />
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Metric_A1</span>
+                        </div>
+                        <p className="text-2xl font-bold tracking-tight">{s.value}</p>
+                        <p className="text-xs text-muted-foreground mt-1 font-medium">{s.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="h-48 w-full bg-muted/20 border border-border rounded-lg flex items-end p-4 gap-2">
+                    {[30, 45, 35, 60, 50, 80, 70, 90, 85, 60, 75, 55, 40, 65, 95, 80].map((h, i) => (
+                      <div key={i} className="flex-1 bg-primary/20 hover:bg-primary transition-colors rounded-t-sm" style={{ height: `${h}%` }} />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="px-6 md:px-8 pb-6 md:pb-8">
-                <div className="h-28 rounded-xl bg-gradient-to-r from-violet-500/5 via-indigo-500/5 to-blue-500/5 border border-border/40 flex items-end p-4 gap-1.5">
-                  {[40, 65, 45, 80, 55, 70, 90, 60, 75, 85, 50, 95].map((h, i) => (
-                    <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-violet-500/60 to-indigo-500/60" style={{ height: `${h}%` }} />
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+      {/* Trust Bar */}
+      <section className="py-12 border-y border-border bg-muted/20">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-muted-foreground mb-8">Powering Industrial Ecosystems Globally</p>
+          <div className="flex flex-wrap justify-center gap-12 opacity-40 grayscale">
+            {/* Simple Logo Placeholders */}
+            {['LOGISTICS', 'SENSORTAKE', 'NODEGRID', 'DATASPHERE', 'IOT_CORE'].map(l => (
+              <span key={l} className="text-xl font-black italic tracking-tighter">{l}</span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Section */}
+      <section className="py-24 md:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Reveal>
+            <div className="mb-20 space-y-4 text-center">
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white">Precision-Engineered Features</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Pulse provides the robust tools necessary for high-stakes industrial monitoring and data management.</p>
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                icon: Radio,
+                title: 'Data Channels',
+                description: 'Multiplexed sensor data streams with support for up to 8 granular fields per channel.'
+              },
+              {
+                icon: Shield,
+                title: 'Secure Gateways',
+                description: 'Military-grade encryption for all inbound and outbound telemetry with role-based access.'
+              },
+              {
+                icon: Globe,
+                title: 'Global Delivery',
+                description: 'Edge-cached data retrieval ensuring low-latency visualization for international operations.'
+              },
+              {
+                icon: Zap,
+                title: 'Real-time Logic',
+                description: 'Serverless event triggers and alerts based on real-time sensor threshold violations.'
+              },
+              {
+                icon: Database,
+                title: 'Historian Archive',
+                description: 'High-fidelity historical data storage with instant CSV/JSON export capabilities.'
+              },
+              {
+                icon: Cpu,
+                title: 'Native SDKs',
+                description: 'Optimized libraries for industry-standard hardware including ESP32, Arduino, and Linux.'
+              }
+            ].map((f, i) => (
+              <Reveal key={f.title} delay={i * 0.1}>
+                <div className="p-8 rounded-xl border border-border bg-card hover:border-primary/40 transition-all hover:shadow-lg">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-6">
+                    <f.icon className="w-5 h-5" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
+                  <p className="text-muted-foreground leading-relaxed text-sm">{f.description}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Case Study / Impact Section */}
+      <section className="py-24 bg-slate-900 text-white overflow-hidden relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <Reveal direction="left">
+              <div className="space-y-8">
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Reliability at Every Layer.</h2>
+                <p className="text-lg text-slate-400 leading-relaxed">
+                  Our architecture is built to handle the rigorous demands of industrial automation. 
+                  From sub-second latency to 99.99% uptime, Pulse is the backbone of your IoT operation.
+                </p>
+                <div className="space-y-4">
+                  {[
+                    "Distributed Multi-Region Infrastructure",
+                    "End-to-End TLS 1.3 Communication",
+                    "Automated Device Provisioning",
+                    "API-First Architecture"
+                  ].map(t => (
+                    <div key={t} className="flex items-center gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      <span className="font-semibold text-slate-200">{t}</span>
+                    </div>
                   ))}
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-24 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">Everything You Need</h2>
-            <p className="text-lg text-muted-foreground">A complete platform designed to make IoT data management effortless.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {features.map((feature) => {
-              const Icon = feature.icon
-              return (
-                <div key={feature.title} className="group p-8 rounded-2xl bg-card border border-border/50 hover:border-violet-500/30 transition-all duration-300 hover:shadow-xl hover:shadow-violet-500/5 hover:-translate-y-1">
-                  <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br", feature.gradient, "flex items-center justify-center mb-6 transition-transform duration-300 group-hover:scale-110")}>
-                    <Icon className="w-6 h-6 text-white" />
+            </Reveal>
+            <Reveal direction="right" delay={0.2}>
+              <div className="relative group">
+                <div className="absolute -inset-1 bg-primary/20 rounded-xl blur-2xl opacity-50" />
+                <div className="relative rounded-xl border border-white/10 bg-black/40 p-8 font-mono text-sm leading-relaxed overflow-x-auto">
+                  <div className="flex justify-between items-center mb-6 text-slate-500 text-[10px] uppercase font-bold tracking-widest">
+                    <span>device_uplink.sh</span>
+                    <span>v2.0.1</span>
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{feature.description}</p>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* API Preview */}
-      <section className="py-24 md:py-32 relative">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-sm font-medium text-violet-600 dark:text-violet-400">
-                Developer Friendly
-              </div>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight leading-tight">
-                Simple by Design. <br />
-                <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">Powerful by Default.</span>
-              </h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                Connect your devices in seconds. Our minimal HTTP API handles the heavy lifting, 
-                so you can focus on building your next great project.
-              </p>
-              <ul className="space-y-4">
-                {[
-                  "Standard HTTP POST requests",
-                  "Automatic timestamping",
-                  "Secure Write API Keys",
-                  "Instant data validation"
-                ].map((item) => (
-                  <li key={item} className="flex items-center gap-3 text-base">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-indigo-500 flex items-center justify-center flex-shrink-0">
-                      <ChevronRight className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="font-medium">{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="relative group">
-              <div className="absolute -inset-4 bg-gradient-to-r from-violet-500/10 to-indigo-500/10 rounded-2xl blur-2xl opacity-50 group-hover:opacity-100 transition-opacity" />
-              <div className="relative rounded-2xl bg-[#0d1117] border border-white/10 shadow-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-3 bg-white/5 border-b border-white/10">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]" />
-                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
-                    <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
-                  </div>
-                  <span className="text-xs text-white/40 font-mono">upload.js</span>
-                </div>
-                <div className="p-6 md:p-8 overflow-x-auto">
-                  <pre className="text-sm md:text-base font-mono">
-                    <code className="text-white/90">
-{`// Pulse API Data Upload
-fetch('https://pulse.io/api/data/upload', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    write_api_key: 'your_key',
-    field1: 24.8,  // Temperature
-    field2: 58.2,  // Humidity
-    status: 'Device operational'
-  })
-});`}
-                    </code>
-                  </pre>
+                  <code className="text-emerald-400">
+                    <p>$ curl -X POST https://api.pulse.io/v1/update \</p>
+                    <p className="pl-4">-H "X-API-Key: px_live_8a2..." \</p>
+                    <p className="pl-4">-d "field1=24.8&field2=58.2" </p>
+                    <p className="mt-4 text-slate-400"># Response [200 OK]</p>
+                    <p className="text-blue-400">{`{ "status": "success", "id": 48291 }`}</p>
+                  </code>
                 </div>
               </div>
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-3xl bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600 px-8 py-16 md:px-16 md:py-24 overflow-hidden text-center">
-            <div className="absolute top-0 right-0 -mt-20 -mr-20 w-80 h-80 rounded-full bg-white/10 blur-[80px]" />
-            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 w-80 h-80 rounded-full bg-white/5 blur-[80px]" />
-            
-            <div className="relative z-10 space-y-8">
-              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
-                Ready to pulse your data?
-              </h2>
-              <p className="text-xl text-white/80 max-w-2xl mx-auto">
-                Join developers worldwide and start collecting your sensor data in minutes. 
-                Free to start, easy to scale.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                <Button size="lg" asChild className="rounded-full px-8 bg-white text-violet-600 hover:bg-white/90 font-semibold shadow-xl">
-                  <Link href="/auth/signup">
-                    Create Free Account
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild className="rounded-full px-8 bg-white/10 text-white border-white/30 hover:bg-white/20">
-                  <Link href="/dashboard">View Demo</Link>
-                </Button>
-              </div>
-            </div>
+      <section className="py-32 bg-background">
+        <Reveal distance={20}>
+          <div className="max-w-4xl mx-auto text-center px-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-8">Secure Your Infrastructure.</h2>
+            <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+              Start monitoring your industrial assets today. Deploy our cloud-native 
+              engine and visualize your telemetry in minutes.
+            </p>
+            <CtaButtons />
+            <p className="mt-8 text-sm text-muted-foreground">No credit card required. Up to 3,000 requests/hour included.</p>
           </div>
-        </div>
+        </Reveal>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 py-16 bg-background">
+      <footer className="border-t border-border py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
             <div className="col-span-1 md:col-span-2 space-y-6">
               <Link href="/" className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center text-white">
-                  <Activity className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-md bg-primary flex items-center justify-center text-white">
+                  <Activity className="w-5 h-5" />
                 </div>
-                <span className="font-bold text-lg tracking-tight">Pulse</span>
+                <span className="font-bold text-lg tracking-tight">Pulse IoT</span>
               </Link>
-              <p className="text-muted-foreground max-w-sm leading-relaxed">
-                The open-source standard for IoT data visualization. 
-                Built with precision and love for the maker community.
+              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
+                The standard for industrial data visualization and device management. 
+                Built for security-conscious engineering teams.
               </p>
-              <div className="flex items-center gap-3">
-                <a href="#" className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:text-violet-600 hover:border-violet-500/30 transition-all">
-                  <Github className="w-5 h-5" />
-                </a>
-                <a href="#" className="w-10 h-10 rounded-xl border border-border/60 flex items-center justify-center text-muted-foreground hover:text-violet-600 hover:border-violet-500/30 transition-all">
-                  <Twitter className="w-5 h-5" />
-                </a>
+              <div className="flex gap-4">
+                <a href="#" className="p-2 rounded-md border border-border hover:bg-accent transition-colors"><Github className="w-5 h-5" /></a>
+                <a href="#" className="p-2 rounded-md border border-border hover:bg-accent transition-colors"><Twitter className="w-5 h-5" /></a>
               </div>
             </div>
-            
-            <div className="space-y-6">
-              <h4 className="text-sm font-bold uppercase tracking-widest text-foreground">Platform</h4>
-              <ul className="space-y-4">
-                <li><Link href="/dashboard" className="text-sm text-muted-foreground hover:text-violet-600 transition-colors">Dashboard</Link></li>
-                <li><Link href="/projects" className="text-sm text-muted-foreground hover:text-violet-600 transition-colors">Projects</Link></li>
-                <li><Link href="/docs" className="text-sm text-muted-foreground hover:text-violet-600 transition-colors">Documentation</Link></li>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Product</h4>
+              <ul className="space-y-3">
+                {[{ label: 'Dashboard', href: '/dashboard' }, { label: 'Templates', href: '/projects' }, { label: 'Security', href: '#' }, { label: 'Pricing', href: '#' }].map(i => (
+                  <li key={i.label}><Link href={i.href} className="text-sm text-muted-foreground hover:text-primary transition-colors">{i.label}</Link></li>
+                ))}
               </ul>
             </div>
-
-            <div className="space-y-6">
-              <h4 className="text-sm font-bold uppercase tracking-widest text-foreground">Company</h4>
-              <ul className="space-y-4">
-                <li><Link href="/auth/signin" className="text-sm text-muted-foreground hover:text-violet-600 transition-colors">Sign In</Link></li>
-                <li><Link href="/auth/signup" className="text-sm text-muted-foreground hover:text-violet-600 transition-colors">Get Started</Link></li>
-                <li><Link href="#" className="text-sm text-muted-foreground hover:text-violet-600 transition-colors">Contact</Link></li>
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900 dark:text-white">Support</h4>
+              <ul className="space-y-3">
+                {['Documentation', 'API Reference', 'System Status', 'Contact'].map(i => (
+                  <li key={i}><Link href="#" className="text-sm text-muted-foreground hover:text-primary transition-colors">{i}</Link></li>
+                ))}
               </ul>
             </div>
           </div>
-          
-          <div className="pt-8 border-t border-border/40 flex flex-col md:flex-row items-center justify-between gap-6">
-            <p className="text-sm text-muted-foreground text-center md:text-left">
-              © 2026 Pulse. Built with precision for the next generation of IoT.
-            </p>
-            <div className="flex gap-8">
-              <Link href="#" className="text-xs text-muted-foreground hover:text-violet-600 transition-colors">Privacy Policy</Link>
-              <Link href="#" className="text-xs text-muted-foreground hover:text-violet-600 transition-colors">Terms of Service</Link>
+          <div className="pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-xs text-muted-foreground">© 2026 Pulse IoT Systems. All rights reserved.</p>
+            <div className="flex gap-8 text-xs text-muted-foreground">
+              <Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
+              <Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

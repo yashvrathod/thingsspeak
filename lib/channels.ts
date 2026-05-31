@@ -71,9 +71,8 @@ export async function getUserChannels(userId: string) {
 }
 
 export async function getChannelById(channelId: string, userId?: string) {
-  const whereClause: any = { id: channelId }
+  const whereClause: Record<string, unknown> = { id: channelId }
   
-  // If userId provided, check ownership or public status
   if (userId) {
     whereClause.OR = [
       { userId },
@@ -84,7 +83,7 @@ export async function getChannelById(channelId: string, userId?: string) {
   }
 
   return await prisma.channel.findFirst({
-    where: whereClause,
+    where: whereClause as any,
     include: {
       _count: {
         select: { dataPoints: true },

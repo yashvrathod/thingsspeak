@@ -51,16 +51,17 @@ export async function getChannelDataPoints(
 ) {
   const { limit = 100, startDate, endDate, offset = 0 } = options || {}
 
-  const whereClause: any = { channelId }
+  const whereClause: Record<string, unknown> = { channelId }
   
   if (startDate || endDate) {
-    whereClause.createdAt = {}
-    if (startDate) whereClause.createdAt.gte = startDate
-    if (endDate) whereClause.createdAt.lte = endDate
+    whereClause.createdAt = {} as Record<string, Date>
+    const createdAtFilter = whereClause.createdAt as Record<string, Date>
+    if (startDate) createdAtFilter.gte = startDate
+    if (endDate) createdAtFilter.lte = endDate
   }
 
   return await prisma.dataPoint.findMany({
-    where: whereClause,
+    where: whereClause as any,
     orderBy: { createdAt: 'desc' },
     take: limit,
     skip: offset,
@@ -86,19 +87,24 @@ export async function getRecentDataPoints(channelId: string, hours: number = 24)
   })
 }
 
-export async function deleteOldDataPoints(channelId: string, days: number) {
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - days)
-
-  return await prisma.dataPoint.deleteMany({
-    where: {
-      channelId,
-      createdAt: { lt: cutoff },
-    },
-  })
+interface DataPointWithCreatedAt {
+  createdAt: Date
+  field1?: number | null
+  field2?: number | null
+  field3?: number | null
+  field4?: number | null
+  field5?: number | null
+  field6?: number | null
+  field7?: number | null
+  field8?: number | null
+  latitude?: number | null
+  longitude?: number | null
+  elevation?: number | null
+  status?: string | null
+  [key: string]: unknown
 }
 
-export function formatDataForChart(dataPoints: any[]) {
+export function formatDataForChart(dataPoints: DataPointWithCreatedAt[]) {
   return dataPoints.map(point => ({
     timestamp: point.createdAt.toISOString(),
     time: point.createdAt.toLocaleTimeString(),
@@ -113,27 +119,6 @@ export function formatDataForChart(dataPoints: any[]) {
     field8: point.field8,
     status: point.status,
   }))
-}
-
-export async function exportDataToCSV(dataPoints: any[], fieldLabels: string[]) {
-  const headers = ['timestamp', ...fieldLabels.filter(Boolean), 'latitude', 'longitude', 'status']
-  
-  const rows = dataPoints.map(point => [
-    point.createdAt.toISOString(),
-    point.field1,
-    point.field2,
-    point.field3,
-    point.field4,
-    point.field5,
-    point.field6,
-    point.field7,
-    point.field8,
-    point.latitude,
-    point.longitude,
-    point.status,
-  ].join(','))
-
-  return [headers.join(','), ...rows].join('\n')
 }
 
 export async function getUserStats(userId: string) {

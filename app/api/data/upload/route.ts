@@ -2,11 +2,26 @@ import { NextRequest, NextResponse } from 'next/server'
 import { addDataPoint } from '@/lib/data'
 import { getChannelByWriteKey } from '@/lib/channels'
 import { prisma } from '@/lib/db'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { emitDataPoint } from '@/lib/socket-emitter'
 
-// POST /api/data/upload - Main data ingestion endpoint
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     const body = await request.json()
+    const apiKeyId = body?.api_key || body?.write_api_key || ip
+    const { allowed, remaining } = await checkRateLimit(`upload:${apiKeyId}`)
+    if (!allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429, headers: { 'X-RateLimit-Remaining': String(remaining) } }
+      )
+    }
+
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
+
     const { api_key, write_api_key, channel_id, ...fieldData } = body
 
     // Support both user API keys and channel write keys
@@ -96,8 +111,8 @@ export async function POST(request: NextRequest) {
       status: fieldData.status,
     })
 
-    // TODO: Emit WebSocket event for real-time updates
-    // io.emit(`channel:${channel.id}:data`, dataPoint)
+    // Emit realtime event (delivered via SSE / Socket.IO)
+    await emitDataPoint(dataPoint)
 
     return NextResponse.json({
       success: true,

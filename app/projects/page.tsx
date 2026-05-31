@@ -33,6 +33,7 @@ interface Project {
   description: string
   type: 'BASIC' | 'IOT'
   imageUrl: string | null
+  videoUrl: string | null
   difficulty: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED'
   duration: string | null
   tags: string[]
@@ -106,9 +107,6 @@ export default function ProjectsPage() {
           <div className="flex items-center gap-4">
             <Link href="/" className="text-sm text-muted-foreground hover:text-foreground">
               Home
-            </Link>
-            <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-              Dashboard
             </Link>
             <Button asChild size="sm">
               <Link href="/auth/signup">Get Started</Link>

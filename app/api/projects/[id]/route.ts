@@ -10,10 +10,8 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    console.log('API: Fetching project with ID:', id)
     const session = await getServerSession(authOptions)
     const project = await getProjectById(id, session?.user?.id)
-    console.log('API: Project found:', project ? 'yes' : 'no', 'isPublished:', project?.isPublished)
     
     if (!project || project.isPublished === false) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 })
@@ -51,9 +49,10 @@ export async function PATCH(
     }
 
     return NextResponse.json({ project })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error updating project:', error)
-    return NextResponse.json({ error: error.message || 'Failed to update project' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to update project'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }
 
@@ -77,8 +76,9 @@ export async function DELETE(
     await deleteProject(id, session.user.id, true)
     
     return NextResponse.json({ success: true })
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error deleting project:', error)
-    return NextResponse.json({ error: error.message || 'Failed to delete project' }, { status: 500 })
+    const message = error instanceof Error ? error.message : 'Failed to delete project'
+    return NextResponse.json({ error: message }, { status: 500 })
   }
 }

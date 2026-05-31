@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { getUserStats } from '@/lib/data'
-import { prisma } from '@/lib/db'
 
 export const dynamic = 'force-dynamic'
 

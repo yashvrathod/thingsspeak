@@ -29,7 +29,7 @@ interface Stats {
 export default function DashboardPage() {
   const { data: session } = useSession()
   const [stats, setStats] = useState<Stats | null>(null)
-  const [recentData, setRecentData] = useState<any[]>([])
+  const [recentData, setRecentData] = useState<Record<string, unknown>[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {

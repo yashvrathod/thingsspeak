@@ -227,6 +227,40 @@ enum ProjectType {
   IOT
 }
 
+// Platform-wide settings (key-value store)
+model PlatformSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+
+  @@map("platform_settings")
+}
+
+// Serverless-safe rate limiting
+model RateLimit {
+  id        String   @id @default(cuid())
+  key       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([key, expiresAt])
+  @@index([expiresAt])
+  @@map("rate_limits")
+}
+
+// Realtime events queue (for SSE / WebSocket delivery)
+model RealtimeEvent {
+  id        String   @id @default(cuid())
+  type      String   // "data_point", "channel_update", etc.
+  channelId String?
+  payload   String   // JSON payload
+  createdAt DateTime @default(now())
+
+  @@index([channelId, createdAt])
+  @@index([createdAt])
+  @@map("realtime_events")
+}
+
 enum Difficulty {
   BEGINNER
   INTERMEDIATE

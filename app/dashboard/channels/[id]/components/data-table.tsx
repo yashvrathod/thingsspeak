@@ -8,8 +8,14 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { ChevronLeft, ChevronRight, Search, Download } from 'lucide-react'
 
+interface DataRow {
+  timestamp?: string
+  status?: string | null
+  [key: string]: unknown
+}
+
 interface DataTableProps {
-  data: any[]
+  data: DataRow[]
   fieldLabels: string[]
 }
 
@@ -62,7 +68,18 @@ export default function DataTable({ data, fieldLabels }: DataTableProps) {
                 className="pl-9 w-48"
               />
             </div>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" onClick={() => {
+              const csv = [['timestamp', ...fieldLabels, 'status'].join(','), ...data.map(row =>
+                [row.timestamp, ...fieldLabels.map((_, i) => row[`field${i+1}`] ?? ''), row.status ?? ''].join(',')
+              )].join('\n')
+              const blob = new Blob([csv], { type: 'text/csv' })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'data-export.csv'
+              a.click()
+              URL.revokeObjectURL(url)
+            }}>
               <Download className="w-4 h-4" />
             </Button>
           </div>
@@ -94,21 +111,24 @@ export default function DataTable({ data, fieldLabels }: DataTableProps) {
                 paginatedData.map((row, index) => (
                   <TableRow key={index}>
                     <TableCell className="font-mono text-xs">
-                      {new Date(row.timestamp).toLocaleString()}
+                      {row.timestamp ? new Date(row.timestamp).toLocaleString() : '-'}
                     </TableCell>
-                    {activeFields.map((field) => (
+                      {activeFields.map((field) => {
+                        const value = row[field.key]
+                        return (
                       <TableCell key={field.key}>
-                        {row[field.key] != null ? (
+                        {value != null ? (
                           <span className="font-mono text-sm">
-                            {typeof row[field.key] === 'number' 
-                              ? row[field.key].toFixed(2) 
-                              : row[field.key]}
+                            {typeof value === 'number' 
+                              ? value.toFixed(2) 
+                              : String(value)}
                           </span>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                    ))}
+                        )
+                    })}
                     <TableCell>
                       {row.status ? (
                         <Badge variant="secondary" className="text-xs">

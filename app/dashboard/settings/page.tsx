@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { User, Mail, Shield, AlertTriangle, Loader2, LogOut, Activity } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -15,14 +15,38 @@ export default function SettingsPage() {
   const { data: session } = useSession()
   const [isUpdating, setIsUpdating] = useState(false)
   const [formData, setFormData] = useState({
-    name: session?.user?.name || '',
-    email: session?.user?.email || '',
+    name: '',
+    email: '',
   })
+
+  useEffect(() => {
+    if (session?.user) {
+      setFormData({
+        name: session.user.name || '',
+        email: session.user.email || '',
+      })
+    }
+  }, [session])
 
   const handleUpdateProfile = async () => {
     setIsUpdating(true)
-    toast.info('Profile update coming soon')
-    setIsUpdating(false)
+    try {
+      const response = await fetch('/api/auth/update-profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: formData.name }),
+      })
+      if (response.ok) {
+        toast.success('Profile updated successfully')
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Failed to update profile')
+      }
+    } catch {
+      toast.error('Failed to update profile')
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   return (

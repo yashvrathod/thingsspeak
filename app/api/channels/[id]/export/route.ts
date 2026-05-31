@@ -32,6 +32,11 @@ export async function GET(
 
     if (format === 'csv') {
       // Generate CSV
+      const esc = (v: unknown) => {
+        const s = v?.toString() ?? ''
+        return s.includes(',') || s.includes('"') || s.includes('\n') ? `"${s.replace(/"/g, '""')}"` : s
+      }
+
       const fieldLabels = [
         channel.field1Label,
         channel.field2Label,
@@ -46,18 +51,18 @@ export async function GET(
       const headers = ['timestamp', ...fieldLabels.filter(Boolean), 'latitude', 'longitude', 'status']
       
       const rows = dataPoints.map((point: typeof dataPoints[0]) => [
-        point.createdAt.toISOString(),
-        point.field1,
-        point.field2,
-        point.field3,
-        point.field4,
-        point.field5,
-        point.field6,
-        point.field7,
-        point.field8,
-        point.latitude,
-        point.longitude,
-        point.status,
+        esc(point.createdAt.toISOString()),
+        esc(point.field1),
+        esc(point.field2),
+        esc(point.field3),
+        esc(point.field4),
+        esc(point.field5),
+        esc(point.field6),
+        esc(point.field7),
+        esc(point.field8),
+        esc(point.latitude),
+        esc(point.longitude),
+        esc(point.status),
       ].join(','))
 
       const csv = [headers.join(','), ...rows].join('\n')

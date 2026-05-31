@@ -9,8 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, UserPlus, Activity } from 'lucide-react'
-import bcrypt from 'bcryptjs'
-
 export default function SignUpPage() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
@@ -40,15 +38,13 @@ export default function SignUpPage() {
     }
 
     try {
-      const hashedPassword = await bcrypt.hash(formData.password, 12)
-
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: formData.name,
           email: formData.email,
-          password: hashedPassword,
+          password: formData.password,
         }),
       })
 

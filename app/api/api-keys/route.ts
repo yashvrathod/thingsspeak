@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { createApiKey, getUserApiKeys, revokeApiKey, regenerateApiKey } from '@/lib/api-keys'
+import { createApiKey, getUserApiKeys, deleteApiKey, revokeApiKey } from '@/lib/api-keys'
 
 // GET /api/api-keys - Get all user API keys
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const apiKeys = await getUserApiKeys(session.user.id)
-    
+
     return NextResponse.json({ apiKeys })
   } catch (error) {
     console.error('Error fetching API keys:', error)
@@ -25,7 +25,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -50,11 +50,40 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE /api/api-keys - Revoke an API key
+// DELETE /api/api-keys - Hard-delete an API key
 export async function DELETE(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const keyId = searchParams.get('id')
+
+    if (!keyId) {
+      return NextResponse.json({ error: 'API key ID is required' }, { status: 400 })
+    }
+
+    const success = await deleteApiKey(keyId, session.user.id)
+
+    if (!success) {
+      return NextResponse.json({ error: 'API key not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('Error deleting API key:', error)
+    return NextResponse.json({ error: 'Failed to delete API key' }, { status: 500 })
+  }
+}
+
+// PATCH /api/api-keys - Revoke (soft-deactivate) an API key
+export async function PATCH(request: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -67,7 +96,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     const success = await revokeApiKey(keyId, session.user.id)
-    
+
     if (!success) {
       return NextResponse.json({ error: 'API key not found' }, { status: 404 })
     }

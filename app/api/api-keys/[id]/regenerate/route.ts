@@ -6,9 +6,10 @@ import { regenerateApiKey } from '@/lib/api-keys'
 // POST /api/api-keys/[id]/regenerate - Regenerate an API key
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.id) {
@@ -22,7 +23,7 @@ export async function POST(
       return NextResponse.json({ error: 'Invalid expiry time' }, { status: 400 })
     }
 
-    const apiKey = await regenerateApiKey(params.id, session.user.id, expiresInDays)
+    const apiKey = await regenerateApiKey(id, session.user.id, expiresInDays)
     
     if (!apiKey) {
       return NextResponse.json({ error: 'API key not found' }, { status: 404 })

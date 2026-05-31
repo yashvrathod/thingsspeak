@@ -62,11 +62,7 @@ export async function getProjects(filters?: {
   search?: string
   featured?: boolean
 }) {
-  // Build where clause - show projects that are published OR have null isPublished
-  const where: any = {}
-  
-  // Handle published filter - use not equals false to catch both true and null
-  where.isPublished = { not: false }
+  const where: Record<string, unknown> = { isPublished: { not: false } }
 
   if (filters?.type) where.type = filters.type
   if (filters?.difficulty) where.difficulty = filters.difficulty
@@ -85,7 +81,7 @@ export async function getProjects(filters?: {
   }
 
   const projects = await prisma.project.findMany({
-    where,
+    where: where as any,
     include: {
       user: { select: { name: true, email: true } },
     },
@@ -97,7 +93,7 @@ export async function getProjects(filters?: {
   // Get usage counts separately
   const projectsWithCount = await Promise.all(
     projects.map(async (p) => {
-      const count = await (prisma as any).userProject.count({ where: { projectId: p.id } })
+      const count = await prisma.userProject.count({ where: { projectId: p.id } })
       return { ...p, usageCount: count }
     })
   )
@@ -105,7 +101,6 @@ export async function getProjects(filters?: {
   return projectsWithCount
 }
 
-// Get all projects for admin (including unpublished)
 export async function getAllProjectsAdmin() {
   const projects = await prisma.project.findMany({
     include: {
@@ -116,10 +111,9 @@ export async function getAllProjectsAdmin() {
     ],
   })
 
-  // Get usage counts separately
   const projectsWithCount = await Promise.all(
     projects.map(async (p) => {
-      const count = await (prisma as any).userProject.count({ where: { projectId: p.id } })
+      const count = await prisma.userProject.count({ where: { projectId: p.id } })
       return { ...p, usageCount: count }
     })
   )
@@ -138,16 +132,14 @@ export async function getProjectById(id: string, userId?: string) {
 
   if (!project || project.isPublished === false) return null
 
-  // Get usage count
-  const usageCount = await (prisma as any).userProject.count({ where: { projectId: id } })
+  const usageCount = await prisma.userProject.count({ where: { projectId: id } })
 
-  // Check if current user has activated this project
-  let userProject = null
+  type UserProjectResult = Awaited<ReturnType<typeof prisma.userProject.findFirst>>
+  let userProject: (UserProjectResult & { channel?: Record<string, unknown> | null }) | null = null
   if (userId) {
-    userProject = await (prisma as any).userProject.findFirst({
+    userProject = await prisma.userProject.findUnique({
       where: {
-        userId,
-        projectId: id,
+        userId_projectId: { userId, projectId: id },
       },
     })
 
@@ -290,11 +282,9 @@ export async function activateProject(
     throw new Error('Project not found')
   }
 
-  const proj = project as any
-
   // Check if user already activated this project
-  const existing = await (prisma as any).userProject.findFirst({
-    where: { userId, projectId },
+  const existing = await prisma.userProject.findUnique({
+    where: { userId_projectId: { userId, projectId } },
   })
 
   if (existing) {
@@ -318,10 +308,11 @@ export async function activateProject(
   let channelId: string | null = null
   let channel = null
 
-  if (proj.type === 'IOT') {
+  if ((project as { type?: string }).type === 'IOT') {
     const readApiKey = generateChannelKey()
     const writeApiKey = generateChannelKey()
 
+    const p = project as { fieldLabels?: string[] }
     channel = await prisma.channel.create({
       data: {
         name: channelName || project.title,
@@ -330,22 +321,21 @@ export async function activateProject(
         userId,
         readApiKey,
         writeApiKey,
-        field1Label: proj.fieldLabels?.[0] || null,
-        field2Label: proj.fieldLabels?.[1] || null,
-        field3Label: proj.fieldLabels?.[2] || null,
-        field4Label: proj.fieldLabels?.[3] || null,
-        field5Label: proj.fieldLabels?.[4] || null,
-        field6Label: proj.fieldLabels?.[5] || null,
-        field7Label: proj.fieldLabels?.[6] || null,
-        field8Label: proj.fieldLabels?.[7] || null,
+        field1Label: p.fieldLabels?.[0] || null,
+        field2Label: p.fieldLabels?.[1] || null,
+        field3Label: p.fieldLabels?.[2] || null,
+        field4Label: p.fieldLabels?.[3] || null,
+        field5Label: p.fieldLabels?.[4] || null,
+        field6Label: p.fieldLabels?.[5] || null,
+        field7Label: p.fieldLabels?.[6] || null,
+        field8Label: p.fieldLabels?.[7] || null,
       },
     })
     
     channelId = channel.id
   }
 
-  // Create user project record
-  const userProject = await (prisma as any).userProject.create({
+  const userProject = await prisma.userProject.create({
     data: {
       userId,
       projectId,
@@ -358,19 +348,18 @@ export async function activateProject(
 
 // Toggle bookmark
 export async function toggleBookmark(userId: string, projectId: string) {
-  const userProject = await prisma.userProject.findFirst({
-    where: { userId, projectId },
+  const userProject = await prisma.userProject.findUnique({
+    where: { userId_projectId: { userId, projectId } },
   })
 
   if (userProject) {
-    return (prisma as any).userProject.update({
+    return prisma.userProject.update({
       where: { id: userProject.id },
       data: { bookmarks: !userProject.bookmarks },
     })
   }
 
-  // Create new with bookmark
-  return (prisma as any).userProject.create({
+  return prisma.userProject.create({
     data: {
       userId,
       projectId,
@@ -381,8 +370,8 @@ export async function toggleBookmark(userId: string, projectId: string) {
 
 // Mark project as completed
 export async function markCompleted(userId: string, projectId: string, completed: boolean) {
-  const userProject = await prisma.userProject.findFirst({
-    where: { userId, projectId },
+  const userProject = await prisma.userProject.findUnique({
+    where: { userId_projectId: { userId, projectId } },
   })
 
   if (userProject) {

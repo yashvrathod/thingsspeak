@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { getProjects, getCategories, getPopularTags, createProject } from '@/lib/projects-new'
+import { getProjects, createProject } from '@/lib/projects-new'
 
 // GET /api/projects - Get all projects
 export async function GET(request: NextRequest) {

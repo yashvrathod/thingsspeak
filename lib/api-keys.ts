@@ -111,6 +111,24 @@ export async function revokeApiKey(keyId: string, userId: string): Promise<boole
   }
 }
 
+export async function deleteApiKey(keyId: string, userId: string): Promise<boolean> {
+  try {
+    const apiKey = await prisma.apiKey.findFirst({
+      where: { id: keyId, userId },
+    })
+
+    if (!apiKey) {
+      return false
+    }
+
+    await prisma.apiKey.delete({ where: { id: keyId } })
+    return true
+  } catch (error) {
+    console.error('Error deleting API key:', error)
+    return false
+  }
+}
+
 export async function regenerateApiKey(keyId: string, userId: string, expiresInDays: number): Promise<ApiKeyResult | null> {
   try {
     const existingKey = await prisma.apiKey.findFirst({
@@ -121,25 +139,22 @@ export async function regenerateApiKey(keyId: string, userId: string, expiresInD
       return null
     }
 
-    // Delete old key
-    await prisma.apiKey.delete({
-      where: { id: keyId },
-    })
-
-    // Create new key with same name
     const newKey = generateApiKey()
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + expiresInDays)
 
-    const apiKey = await prisma.apiKey.create({
-      data: {
-        key: newKey,
-        name: existingKey.name,
-        expiresAt,
-        userId,
-        status: 'ACTIVE',
-      },
-    })
+    const [, apiKey] = await prisma.$transaction([
+      prisma.apiKey.delete({ where: { id: keyId } }),
+      prisma.apiKey.create({
+        data: {
+          key: newKey,
+          name: existingKey.name,
+          expiresAt,
+          userId,
+          status: 'ACTIVE',
+        },
+      }),
+    ])
 
     return {
       id: apiKey.id,
@@ -162,9 +177,5 @@ export async function getUserApiKeys(userId: string) {
 
   return apiKeys.map(key => ({
     ...key,
-    // Mask the key for display (show only first 8 and last 4 chars)
-    key: key.key.length > 12 
-      ? `${key.key.slice(0, 12)}...${key.key.slice(-4)}`
-      : key.key,
   }))
 }

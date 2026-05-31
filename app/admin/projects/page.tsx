@@ -342,11 +342,11 @@ export default function ProjectsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="driveLink" className="flex items-center gap-2">
                     <ExternalLink className="w-4 h-4" />
-                    Google Drive Resources Link
+                    Project Document Link
                   </Label>
                   <Input
                     id="driveLink"
-                    placeholder="https://drive.google.com/drive/folders/..."
+                    placeholder="/word-files/filename.docx"
                     value={formData.driveLink}
                     onChange={(e) => setFormData({ ...formData, driveLink: e.target.value })}
                   />
@@ -597,12 +597,14 @@ export default function ProjectsPage() {
                   ))}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Button asChild variant="outline" size="sm" className="flex-1">
-                    <a href={project.driveLink} target="_blank" rel="noopener noreferrer">
-                      <ExternalLink className="w-4 h-4 mr-1" />
-                      View
-                    </a>
-                  </Button>
+                  {project.driveLink && (
+                    <Button asChild variant="outline" size="sm" className="flex-1">
+                      <a href={project.driveLink} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="w-4 h-4 mr-1" />
+                        View
+                      </a>
+                    </Button>
+                  )}
                   <Button 
                     variant="ghost" 
                     size="icon"

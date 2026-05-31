@@ -24,10 +24,14 @@ import { useState } from 'react'
 function CodeBlock({ code, language = 'cpp' }: { code: string; language?: string }) {
   const [copied, setCopied] = useState(false)
   
-  const copy = () => {
-    navigator.clipboard.writeText(code)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(code)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      // Clipboard write failed
+    }
   }
   
   return (

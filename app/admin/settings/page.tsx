@@ -24,8 +24,21 @@ export default function SettingsPage() {
 
   const handleSave = async () => {
     setIsSaving(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setIsSaving(false)
+    try {
+      const response = await fetch('/api/admin/settings', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(settings),
+      })
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to save settings')
+      }
+    } catch (error) {
+      console.error('Error saving settings:', error)
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   return (

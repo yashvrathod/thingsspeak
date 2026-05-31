@@ -16,7 +16,7 @@ interface Project {
   title: string
   description: string
   imageUrl: string | null
-  driveLink: string
+  driveLink: string | null
   tags: string[]
   category: string | null
   createdAt: string
@@ -191,12 +191,19 @@ export default function ProjectsPage() {
                 {/* Actions */}
                 <div className="mt-auto flex items-center gap-2">
                   <Button asChild className="flex-1 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700">
-                    <Link href={project.driveLink} target="_blank" rel="noopener noreferrer">
+                    <Link href={`/projects/${project.id}`}>
                       <FileText className="w-4 h-4 mr-2" />
                       View Project
                       <ExternalLink className="w-3 h-3 ml-2" />
                     </Link>
                   </Button>
+                  {project.driveLink && (
+                    <Button asChild variant="outline" size="icon" className="rounded-xl shrink-0">
+                      <Link href={project.driveLink} target="_blank" rel="noopener noreferrer" title="Open Project Document">
+                        <ExternalLink className="w-4 h-4" />
+                      </Link>
+                    </Button>
+                  )}
                 </div>
 
                 <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1.5">
