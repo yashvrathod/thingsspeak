@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +13,6 @@ import { LogIn, Loader2, Activity } from 'lucide-react'
 import { toast } from 'sonner'
 
 function SignInForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const callbackUrl = searchParams?.get('callbackUrl') || '/dashboard'
   const error = searchParams?.get('error')
@@ -40,7 +39,7 @@ function SignInForm() {
       if (result?.error) {
         toast.error(result.error === 'CredentialsSignin' ? 'Invalid email or password' : 'An error occurred during sign in')
       } else {
-        router.push(callbackUrl)
+        window.location.href = callbackUrl
       }
     } catch {
       toast.error('An unexpected error occurred')
